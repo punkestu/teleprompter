@@ -3,6 +3,7 @@
 
   let videoStream;
   let isRecording = false;
+  let isPaused = false;
 
   let stream;
   let mediaRecorder;
@@ -15,7 +16,8 @@
   let scriptElement;
   let step = 0;
   $: reverseScript = script
-    .split(" ")
+    .split("\n")
+    .flatMap((t) => t.split(" "))
     .map((t) => `<span>${t}</span>`)
     .reverse()
     .join("");
@@ -59,11 +61,14 @@
   $: {
     if (isRecording) {
       clearInterval(interval);
-      interval = animate(speed);
+      if (!isPaused) {
+        interval = animate(speed);
+      }
     }
   }
 
   const record = () => {
+    isPaused = false;
     if (isRecording) {
       mediaRecorder.stop();
       isRecording = false;
@@ -71,6 +76,18 @@
     } else {
       mediaRecorder.start();
       isRecording = true;
+    }
+  };
+
+  const pause = () => {
+    if (isRecording) {
+      if (isPaused) {
+        mediaRecorder.resume();
+        isPaused = false;
+      } else {
+        mediaRecorder.pause();
+        isPaused = true;
+      }
     }
   };
 
@@ -82,18 +99,34 @@
 <main class="p-2 min-h-screen bg-slate-950 text-white">
   <section id="script" class="flex flex-col justify-center items-center">
     <button on:click={toggleSetting} class="underline">Settings</button>
-    <div class="{!setting && "hidden"} w-full">
-      <input type="range" bind:value={speed} min="0" max="1000" class="w-full">
-      <textarea bind:value={script} class="p-2 w-full resize-y text-slate-800" placeholder="Enter your script here..."
+    <div class="{!setting && 'hidden'} w-full">
+      <input
+        type="range"
+        bind:value={speed}
+        min="0"
+        max="1000"
+        class="w-full"
+      />
+      <textarea
+        bind:value={script}
+        class="p-2 w-full resize-y text-slate-800"
+        placeholder="Enter your script here..."
       ></textarea>
     </div>
   </section>
 
   <section id="camera" class="flex flex-col justify-center items-center">
     {#if ready}
-      <button on:click={record} class="bg-slate-50 text-slate-800 px-2 py-1"
-        >{isRecording ? "Stop" : "Record"}</button
-      >
+      <div class="flex gap-2">
+        <button on:click={record} class="bg-slate-50 text-slate-800 px-2 py-1"
+          >{isRecording ? "Stop" : "Record"}</button
+        >
+        {#if isRecording}
+          <button on:click={pause} class="bg-slate-50 text-slate-800 px-2 py-1"
+            >{isPaused ? "Resume" : "Pause"}</button
+          >
+        {/if}
+      </div>
     {:else}
       <p class="text-center">Loading Camera...</p>
     {/if}
