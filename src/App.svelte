@@ -9,7 +9,6 @@
   let mediaRecorder;
 
   let ready = false;
-  let setting = false;
 
   let speed = 100;
   let script = "";
@@ -90,16 +89,12 @@
       }
     }
   };
-
-  const toggleSetting = () => {
-    setting = !setting;
-  };
 </script>
 
 <main class="p-2 min-h-screen bg-slate-950 text-white">
   <section id="script" class="flex flex-col justify-center items-center">
-    <button on:click={toggleSetting} class="underline">Settings</button>
-    <div class="{!setting && 'hidden'} w-full">
+    <button popovertarget="setting" class="underline">Setup</button>
+    <div id="setting" popover="auto" class="w-2/3 rounded-md p-2 bg-slate-500">
       <input
         type="range"
         bind:value={speed}
@@ -109,7 +104,7 @@
       />
       <textarea
         bind:value={script}
-        class="p-2 w-full resize-y text-slate-800"
+        class="p-2 rounded-sm w-full resize-y text-slate-800"
         placeholder="Enter your script here..."
       ></textarea>
     </div>
